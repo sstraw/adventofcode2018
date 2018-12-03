@@ -44,7 +44,7 @@ func main() {
         for _, s2 := range(codes[i+1:]) {
             overlap, diffs := diff (s1, s2, 1)
             if diffs == 1 {
-                fmt.Printf("%s\n%s\n%s\n", s1, s2, overlap)
+                fmt.Printf("s1: %s\ns2: %s\ncode: %s\n", s1, s2, overlap)
                 return
             }
         }

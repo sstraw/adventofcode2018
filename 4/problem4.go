@@ -66,9 +66,22 @@ func main () {
         }
     }
 
-    m := g.HighestMinute()
+    m, _ := g.HighestMinute()
     fmt.Printf("Guard %v slept most in minutes %v\n%vx%v=%v\n",
                 g.Id, m, g.Id, m, g.Id*m)
+
+    g = guards[gId]
+    g_min, g_minc := g.HighestMinute()
+    for _, v := range guards {
+        v_min, v_minc := v.HighestMinute()
+        if v_minc > g_minc {
+            g_min, g_minc = v_min, v_minc
+            g = v
+        }
+    }
+    fmt.Printf("Guard %v slept in minutes %v %v times\n%vx%v=%v\n",
+                g.Id, g_min, g_minc, g.Id, g_min, g.Id*g_min)
+
 }
 
 func (g *Guard) Slept (start, stop int) {
@@ -102,14 +115,14 @@ func (g Guard) String () string {
     return buf.String()
 }
 
-func (g *Guard) HighestMinute () int {
+func (g *Guard) HighestMinute () (int, int) {
     index, max := 0, g.MinSleep[0]
     for i, v := range g.MinSleep {
         if v > max {
             index, max = i, v
         }
     }
-    return index
+    return index, max
 }
 
 func (g *Guard) SleptMore (g2 *Guard) bool {

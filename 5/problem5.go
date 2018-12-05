@@ -5,6 +5,7 @@ import (
     "bufio"
     "fmt"
     "container/list"
+    "regexp"
 )
 
 func main() {
@@ -14,6 +15,22 @@ func main() {
     scanner.Scan()
     input = scanner.Text()
 
+    nPoly := react(input)
+    fmt.Println("Reaction with sub:", nPoly)
+
+    for i := 65; i < 91; i++ {
+        re := regexp.MustCompile(fmt.Sprintf("[%c%c]", i, i | 0x20))
+        new_input := re.ReplaceAllLiteralString(input, "")
+        newReact := react(new_input)
+        if newReact < nPoly {
+            nPoly = newReact
+        }
+    }
+
+    fmt.Println("Minimal reaction:", nPoly)
+}
+
+func react(input string) int {
     chars := list.New()
     for _, char := range input {
         chars.PushBack(char)
@@ -47,5 +64,5 @@ func main() {
         }
     }
 
-    fmt.Println("Remaining units:", chars.Len())
+    return chars.Len()
 }

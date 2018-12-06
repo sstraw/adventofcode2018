@@ -81,6 +81,20 @@ func main () {
         }
     }
     fmt.Println("Max area:", max)
+
+    safeArea := 0
+    for x := west; x <= east; x++ {
+        for y := north; y <= south; y++ {
+            distances := 0
+            for _, c := range coords {
+                distances += getDistance(x, y, c.X, c.Y)
+            }
+            if distances < 10000 {
+                safeArea++;
+            }
+        }
+    }
+    fmt.Println("Safe area:", safeArea)
  }
 
 func getClosest(coords []*Coord, x, y  int) *Coord {

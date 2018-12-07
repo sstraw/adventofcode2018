@@ -46,6 +46,8 @@ func main () {
                     w.Project = 0
                 }
             }
+        }
+        for j, w := range workers {
             if w.Project == 0 {
                 p := getJob(steps)
                 if p == 0 {
@@ -56,13 +58,13 @@ func main () {
                 w.Project = p
                 w.Time = 61 + int(p) - 0x41
             }
-            fmt.Printf("P:%c , T:%v \n", w.Project, w.Time)
+            fmt.Printf("W: %v, P:%c , T:%v \n", j, w.Project, w.Time)
         }
         if allDone(steps){
             break
         }
     }
-    fmt.Println("Took", i-1)
+    fmt.Println("Took", i)
 }
 
 type Worker struct {

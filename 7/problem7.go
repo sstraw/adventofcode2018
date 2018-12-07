@@ -5,11 +5,26 @@ import (
     "bufio"
     "fmt"
     "regexp"
+    "flag"
 )
 
 func main () {
     scanner := bufio.NewScanner(os.Stdin)
     re := regexp.MustCompile("Step ([A-Z]) must be finished before step ([A-Z]) can begin.")
+
+    nWorkers := flag.Int("w", 5, "Number of workers for part 2. " +
+                         "2 workers for test input")
+    weight   := flag.Int("t", 61, "Time for step A to complete. " +
+                         "For test input, weight is 1")
+    test     := flag.Bool("test", false, "Set to true for test worker/weight")
+
+    flag.Parse()
+    if *test {
+        *nWorkers = 2
+        *weight = 1
+    }
+
+    fmt.Println(*nWorkers, "workers, A =", *weight, "second.")
 
     var steps [26]*Step
     for scanner.Scan() {
@@ -28,7 +43,18 @@ func main () {
 
     }
 
-    workers := make([]*Worker, 5)
+    fmt.Print("7a: ")
+    stepsA := steps
+    for !allDone(stepsA) {
+        p := getJob(stepsA)
+        fmt.Printf("%c", p)
+        stepsA[p-0x41] = nil
+    }
+    fmt.Println()
+
+
+
+    workers := make([]*Worker, *nWorkers)
 
     for i, _ := range workers {
         workers[i] = &Worker{}
@@ -36,10 +62,8 @@ func main () {
 
     i := 0
     for ;;i++ {
-        fmt.Printf("===%v===\n", i)
         for _, w := range workers {
             if w.Project != 0 {
-                fmt.Println("Subtracting")
                 w.Time--
                 if w.Time == 0 {
                     steps[w.Project-0x41] = nil
@@ -47,24 +71,22 @@ func main () {
                 }
             }
         }
-        for j, w := range workers {
+        for _, w := range workers {
             if w.Project == 0 {
                 p := getJob(steps)
                 if p == 0 {
                     continue
                 }
-                fmt.Printf("Assigning %c\n", p)
                 steps[p-0x41].Working = true
                 w.Project = p
-                w.Time = 61 + int(p) - 0x41
+                w.Time = *weight + int(p) - 0x41
             }
-            fmt.Printf("W: %v, P:%c , T:%v \n", j, w.Project, w.Time)
         }
         if allDone(steps){
             break
         }
     }
-    fmt.Println("Took", i)
+    fmt.Println("7b:", i, "seconds")
 }
 
 type Worker struct {

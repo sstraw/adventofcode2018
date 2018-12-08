@@ -27,7 +27,7 @@ func main () {
         }
     }
     treeData := make([]*Node, 0)
-    _ = Parse(rawTree, &treeData)
+    rootNode := Parse(rawTree, &treeData)
 
     metaSum := 0
     for _, node := range(treeData) {
@@ -36,6 +36,9 @@ func main () {
         }
     }
     fmt.Println("Sum of meta:", metaSum)
+
+    val := Value(rootNode, &treeData)
+    fmt.Println("Value of root:", val)
 }
 
 func Parse (input []int, output *[]*Node) *Node {
@@ -63,3 +66,21 @@ func helpParse (input []int, output *[]*Node, index int) (*Node, int) {
     return node, index
 }
 
+func Value (n *Node, treeData *[]*Node) int {
+    i := 0
+    if len(n.Children) == 0 {
+        for _, v := range n.Meta {
+            i += v
+        }
+    } else {
+        for _, v := range n.Meta {
+            v = v - 1 //Account for offset
+            if v < 0 || v >= len(n.Children) {
+                continue // skip if not a child
+            } else {
+                i += Value((*treeData)[n.Children[v]], treeData)
+            }
+        }
+    }
+    return i
+}

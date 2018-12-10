@@ -3,7 +3,7 @@ package main
 import (
     "flag"
     "fmt"
-    "container/list"
+    "container/ring"
 )
 
 func main () {
@@ -11,40 +11,30 @@ func main () {
     lastMarble := flag.Int("m", 70901, "Score of last marble")
     flag.Parse()
 
-    circle     := list.New()
+    circle      := ring.New(1)
     //Start with the zero marble as current
-    currMarble := circle.PushBack(0)
+    circle.Value = 0
 
     //List of scores to track
     scores := make([]int, *nPlayers)
 
-    currPlayer := 0
 
     for newMarble := 1; newMarble <= *lastMarble; newMarble++ {
         if newMarble % 23 == 0 {
+            currPlayer := (newMarble - 1) % *nPlayers
             scores[currPlayer] += newMarble
-            for i := 0; i < 7; i++ {
-                currMarble = currMarble.Prev()
-                if currMarble == nil {
-                    currMarble = circle.Back()
-                }
+            for i:=0; i < 7; i++ {
+                circle = circle.Prev()
             }
-            tmp := currMarble
-            currMarble = currMarble.Next()
-            if currMarble == nil {
-                currMarble = circle.Front()
-            }
-            scores[currPlayer] += circle.Remove(tmp).(int)
+            scores[currPlayer] += circle.Value.(int)
+            circle = circle.Prev()
+            circle.Unlink(1)
+            circle = circle.Next()
         } else {
-            placement := currMarble.Next()
-            if placement == nil {
-                placement = circle.Front()
-            }
-            currMarble = circle.InsertAfter(newMarble, placement)
-        }
-        currPlayer++
-        if !(currPlayer < *nPlayers) {
-            currPlayer = 0
+            circle = circle.Next()
+            circle.Link(ring.New(1))
+            circle = circle.Next()
+            circle.Value = newMarble
         }
     }
 

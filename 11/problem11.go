@@ -47,4 +47,28 @@ func main () {
         }
     }
     fmt.Printf("Max power %v at %v, %v\n", m, mX+1, mY+1)
+
+    m, mX, mY, mS := -99999, 0, 0, 0
+    for x := 0; x < 300; x++ {
+        for y := 0; y < 300; y++ {
+            p := 0
+            var limS int
+            if x > y {
+                limS = 300 - x
+            } else {
+                limS = 300 - y
+            }
+            for s := 0; s < limS; s++ {
+                for i := 0; i < s; i++ {
+                    p += cells[(x + i) * 300 + y + s]
+                    p += cells[(x + s) * 300 + y + i]
+                }
+                p += cells[(x + s) * 300 + y + s]
+                if p > m {
+                    m, mX, mY, mS = p, x, y, s
+                }
+            }
+        }
+    }
+    fmt.Printf("Max power %v at %v,%v,%v\n", m, mX+1, mY+1, mS+1)
 }

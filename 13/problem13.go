@@ -22,6 +22,8 @@ type ByPos []*Cart
 func (a ByPos) Len()          int  { return len(a) }
 func (a ByPos) Swap(i, j int)      {a[i], a[j] = a[j], a[i]}
 func (a ByPos) Less(i, j int) bool {
+    if a[i] == nil { return false }
+    if a[j] == nil { return true}
     return (a[i].X < a[j].X) || (a[i].X == a[j].X && a[i].Y < a[j].Y)
 }
 
@@ -59,9 +61,12 @@ func main () {
         }
     }
 
-    for tick := 0; ; tick++ {
-        sort.Sort(ByPos(carts))
-        for _, c := range carts {
+    noCrashes := true
+
+    sort.Sort(ByPos(carts))
+    for tick := 0; len(carts) > 1; tick++ {
+        for i, c := range carts {
+            if c == nil {continue}
             t := track[c.Y * xWidth + c.X]
             switch t {
             case ' ':
@@ -105,13 +110,29 @@ func main () {
                 c.X--
             }
             // Got new position. Loop through carts and check if we've crashed
-            for _, c2 := range carts {
-                if c.X == c2.X && c.Y == c2.Y && c != c2 {
-                    fmt.Printf("Crashed at %v,%v\n", c.X, c.Y)
-                    return
+            for i2, c2 := range carts {
+                if c2 != nil && c.X == c2.X && c.Y == c2.Y && c != c2 {
+                    if noCrashes {
+                        fmt.Printf("First crash at %v,%v\n", c.X, c.Y)
+                        noCrashes = false
+                    }
+                    carts[i], carts[i2] = nil, nil
                 }
             }
         }
+        sort.Sort(ByPos(carts))
+        for i, _ := range carts {
+            if carts[i] == nil {
+                carts = carts[:i]
+                break
+            }
+        }
+    }
+
+    if len(carts) == 1 {
+        fmt.Printf("Last cart at %v, %v\n", carts[0].X, carts[0].Y)
+    } else {
+        fmt.Println("No carts left")
     }
 }
 

@@ -3,52 +3,59 @@ package main
 import (
     "flag"
     "fmt"
-    "container/list"
+    "strconv"
 )
 
 func main () {
-    nRecipes := flag.Int("r", 556061, "Number of recipes to go to")
+    rawInput := flag.String("r", "556061", "Number of recipes to go to")
     flag.Parse()
 
-    recipes := list.New()
+    recipes := make([]int, 2)
+    recipes[0], recipes[1] = 3, 7
 
-    recipes.PushBack(3)
-    recipes.PushBack(7)
+    input, _ := strconv.Atoi(*rawInput)
+    inputArray := make([]int, 0)
+    for i, _ := range *rawInput {
+        inputArray = append(inputArray, int((*rawInput)[i] - 0x30))
+    }
+    nInputArray := len(inputArray)
 
-    elf1 := recipes.Front()
-    elf2 := recipes.Back()
-
-    out := make([]int, 0, 10)
-
-    for recipes.Len() < *nRecipes + 10{
-        recipe1, recipe2 := elf1.Value.(int), elf2.Value.(int)
+    solveda, solvedb := false, false
+    elf1, elf2 := 0, 1
+    for !solveda || !solvedb {
+        recipe1, recipe2 := recipes[elf1], recipes[elf2]
         n := recipe1 + recipe2
         newRecipe1, newRecipe2 := n/10, n%10
-
         if newRecipe1 != 0 {
-            recipes.PushBack(newRecipe1)
-            if recipes.Len() > *nRecipes {
-                out = append(out, newRecipe1)
+            recipes = append(recipes, newRecipe1)
+        }
+        recipes = append(recipes, newRecipe2)
+
+        elf1 = (elf1 + recipe1 + 1) % len(recipes)
+        elf2 = (elf2 + recipe2 + 1) % len(recipes)
+
+        if !solveda && len(recipes) >= input + 10 {
+            fmt.Print("Part a: ")
+            for i := input; i < input+10; i++ { fmt.Print(recipes[i]) }
+            fmt.Println()
+            solveda = true
+        }
+
+        if !solvedb && len(recipes) >= len(inputArray) + 5{
+            end := len(recipes) - 1
+            for o := 0; o < 2; o++ {
+                solvedb = true
+                for i, _ := range inputArray {
+                    if inputArray[nInputArray-i-1] != recipes[end-o-i] {
+                        solvedb = false
+                        break
+                    }
+                }
+                if solvedb {
+                    fmt.Println("Part b:", end - o - len(inputArray) + 1)
+                    break
+                }
             }
         }
-        recipes.PushBack(newRecipe2)
-        if recipes.Len() > *nRecipes {
-            out = append(out, newRecipe2)
-        }
-        for i := 0; i < 1 + recipe1; i++ {
-            elf1 = elf1.Next()
-            if elf1 == nil {elf1 = recipes.Front()}
-        }
-        for i := 0; i < 1 + recipe2; i++ {
-            elf2 = elf2.Next()
-            if elf2 == nil {elf2 = recipes.Front()}
-        }
     }
-
-
-    fmt.Print("String: ")
-    for _, i := range out {
-        fmt.Print(i)
-    }
-    fmt.Println()
 }
